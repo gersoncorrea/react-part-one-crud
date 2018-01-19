@@ -3,6 +3,8 @@ import $ from 'jquery';
 import InputCustomizado from './componentes/InputCustomizado';
 import PubSub from 'pubsub-js';
 import TratadorErros from './TratadorErros';
+
+
 export class FormularioAutor extends Component{
     constructor(){
         super();
@@ -27,7 +29,7 @@ export class FormularioAutor extends Component{
           }.bind(this),
           error: function(resposta){
             if(resposta.status === 400){
-              new TratadorErros().publicErros(resposta.responseJSON)
+              new TratadorErros().publicaErros(resposta.responseJSON)
             }
           },
           beforeSend:function(){
@@ -118,8 +120,13 @@ export default class AutorBox extends Component{
     render(){
         return(
             <div>
+              <div className="header">
+                <h1>cadastro de autores</h1>
+              </div>
+              <div classname="content" id="content">
                 <FormularioAutor/>
-              <TabelaAutores lista={this.state.lista} />
+                <TabelaAutores lista={this.state.lista} />
+              </div>
             </div>
         );
     }
