@@ -2,6 +2,11 @@ import React, { Component } from 'react';
 
 export default class InputCustomizado extends Component{
 
+	constructor(){
+		super();
+		this.state = {msgErro: ''}
+	}
+
 	render() {
 		return (
 			<div className="pure-control-group">
@@ -10,4 +15,17 @@ export default class InputCustomizado extends Component{
 			</div>			
 		);
 	}
+
+	componentDidMount(){
+		PubSub.subscribe("erro-validacao",function(topico, erro){
+			if(errp.field === this.props.name){
+				this.setState({msgErro:erro.defaultMessage});
+			}
+		}.bind(this));
+	
+		PubSub.subscribe("limpa-erros",function(topico){
+			this.setState({msgErro:''})
+		}.bind(this));
+	}
+
 }

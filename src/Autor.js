@@ -1,11 +1,12 @@
 import React,{Component} from 'react';
 import $ from 'jquery';
 import InputCustomizado from './componentes/InputCustomizado';
-
+import PubSub from 'pubsub-js';
+import TratadorErros from './TratadorErros';
 export class FormularioAutor extends Component{
     constructor(){
         super();
-        this.state = {lista: []};
+        this.state = {nome:'',email:'',senha:''};
         this.enviaForm = this.enviaForm.bind(this);
         this.setNome = this.setNome.bind(this);
         this.setEmail = this.setEmail.bind(this);
@@ -21,11 +22,16 @@ export class FormularioAutor extends Component{
           type:'post',
           data: JSON.stringify({nome:this.state.nome,email:this.state.email,senha:this.state.senha}),
           success: function(resposta){
-              this.props.callbackAtualizaListagem(resposta)
-            //this.setState({lista:resposta});        
+              PubSub.publish('atualiza-lista-autores',novaListagem)
+              this.setState({nome:'',email:'',senha:''});        
           }.bind(this),
           error: function(resposta){
-            console.log("erro: ",resposta);
+            if(resposta.status === 400){
+              new TratadorErros().publicErros(resposta.responseJSON)
+            }
+          },
+          beforeSend:function(){
+            PubSub.publish("limpa-erros",{})
           }      
         });
       }
@@ -59,25 +65,7 @@ export class FormularioAutor extends Component{
     }
 }
 
-export class TabelaAutores extends Component{
-
-    constructor(){
-        super();
-        this.state = {lista: []}
-    }
-
-    componentDidMount(){  
-        $.ajax({
-            url:"http://localhost:8080/api/autores",
-            dataType: 'json',
-            success:function(resposta){    
-              this.setState({lista:resposta});
-            }.bind(this)
-          }
-        );
-    }
-
-    
+export class TabelaAutores extends Component{    
     render(){
         return(
             <div>            
@@ -110,8 +98,7 @@ export default class AutorBox extends Component{
 
     constructor(){
         super();
-        this.state = {lista: []}
-        this.atualizaListagem = this.atualizaListagem.bind(this);
+        this.state = {lista: []};
     }
 
     componentDidMount(){  
@@ -123,16 +110,15 @@ export default class AutorBox extends Component{
             }.bind(this)
           }
         );
-    }
-
-    atualizaListagem(novaLista){
-        this.setState({lista: novaLista})
+        PubSub.subscribe('atualiza-lista-autores',function(topico,novaListagem){
+          this.state({lista:novaLista})
+        })
     }
 
     render(){
         return(
             <div>
-                <FormularioAutor callbackAtualizaListagem={this.atualizaListagem}/>
+                <FormularioAutor/>
               <TabelaAutores lista={this.state.lista} />
             </div>
         );
