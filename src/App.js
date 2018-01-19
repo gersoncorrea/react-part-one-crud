@@ -27,11 +27,7 @@ class App extends Component {
               </div>
           </div>
           <div id="main">
-            <div className="header">
-              <h1>bem-Vindo ao sistema</h1>
-            </div>
-            <div className="content" id="content">
-            </div>
+              {this.props.children}            
           </div>
       </div>     
     );
